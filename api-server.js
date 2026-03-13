@@ -20,9 +20,34 @@ const app = express();
 const PORT = process.env.PORT || process.env.API_PORT || 3001;
 const HOST = process.env.HOST || process.env.API_HOST || '0.0.0.0';
 
-// 中间件
-app.use(cors());
+console.log('🚀 启动 API 服务器...');
+console.log('  监听地址:', HOST);
+console.log('  端口:', PORT);
+
+// 中间件 - 增强 CORS
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}));
+
+// 处理 OPTIONS 预检请求
+app.options('*', (req, res) => {
+  console.log('📨 OPTIONS:', req.path);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.status(200).end();
+});
+
 app.use(express.json());
+
+// 请求日志
+app.use((req, res, next) => {
+  console.log(`📥 ${req.method} ${req.path}`);
+  next();
+});
 
 // 工具函数
 function execCommand(command) {
