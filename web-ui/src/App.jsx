@@ -14,6 +14,8 @@ import './App.css';
 function App() {
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [buttonLoading, setButtonLoading] = useState(null); // 'start', 'stop', 'restart', 'refresh'
+  const [apiError, setApiError] = useState(null);
   const [logs, setLogs] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
   const [config, setConfig] = useState(null);
@@ -25,52 +27,82 @@ function App() {
   };
 
   const refreshStatus = async () => {
-    addLog('刷新状态...');
     try {
       const result = await fetchStatus();
       if (result.success) {
         setStatus(result.data);
+        setApiError(null);
         addLog(`状态刷新完成 - ${result.data.skills.total} 个 Skills`);
       } else {
+        setApiError(result.error || 'API 响应异常');
         addLog('获取状态失败：' + result.error);
       }
     } catch (error) {
+      setApiError('无法连接到 API 服务器：' + error.message);
       addLog('获取状态失败：' + error.message);
     } finally {
       setLoading(false);
+      setButtonLoading(null);
     }
   };
 
   const handleStart = async () => {
+    setButtonLoading('start');
     addLog('正在启动 Gateway...');
     try {
       const result = await startGateway();
-      addLog(result.message || 'Gateway 启动成功');
-      setTimeout(refreshStatus, 2000);
+      if (result.success) {
+        addLog('✅ Gateway 启动成功');
+        setTimeout(refreshStatus, 2000);
+      } else {
+        addLog('❌ 启动失败：' + result.error);
+        setApiError(result.error);
+      }
     } catch (error) {
-      addLog('启动失败：' + error.message);
+      addLog('❌ 启动失败：' + error.message);
+      setApiError('启动失败：' + error.message);
+    } finally {
+      setButtonLoading(null);
     }
   };
 
   const handleStop = async () => {
+    setButtonLoading('stop');
     addLog('正在停止 Gateway...');
     try {
       const result = await stopGateway();
-      addLog(result.message || 'Gateway 已停止');
-      setTimeout(refreshStatus, 1000);
+      if (result.success) {
+        addLog('✅ Gateway 已停止');
+        setTimeout(refreshStatus, 1000);
+      } else {
+        addLog('❌ 停止失败：' + result.error);
+        setApiError(result.error);
+      }
     } catch (error) {
-      addLog('停止失败：' + error.message);
+      addLog('❌ 停止失败：' + error.message);
+      setApiError('停止失败：' + error.message);
+    } finally {
+      setButtonLoading(null);
     }
   };
 
   const handleRestart = async () => {
+    setButtonLoading('restart');
     addLog('正在重启 Gateway...');
     try {
       const result = await restartGateway();
-      addLog(result.message || 'Gateway 重启完成');
-      setTimeout(refreshStatus, 3000);
+      if (result.success) {
+        addLog('✅ Gateway 重启完成');
+        setTimeout(refreshStatus, 3000);
+      } else {
+        addLog('❌ 重启失败：' + result.error);
+        setApiError(result.error);
+      }
     } catch (error) {
-      addLog('重启失败：' + error.message);
+      addLog('❌ 重启失败：' + error.message);
+      setApiError('重启失败：' + error.message);
+    } finally {
+      setButtonLoading(null);
     }
   };
 
@@ -177,6 +209,8 @@ function App() {
                   onStop={handleStop}
                   onRestart={handleRestart}
                   onRefresh={refreshStatus}
+                  loading={buttonLoading}
+                  error={apiError}
                 />
                 <SystemInfo status={status} />
               </div>
