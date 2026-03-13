@@ -18,7 +18,7 @@ const SkillsDatabase = require('./src/core/skills-database');
 
 const app = express();
 const PORT = process.env.API_PORT || 3001;
-const HOST = process.env.API_HOST || 'localhost';
+const HOST = process.env.API_HOST || '0.0.0.0';
 
 // 中间件
 app.use(cors());

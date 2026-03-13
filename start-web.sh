@@ -51,9 +51,14 @@ find_available_port() {
     echo $port
 }
 
-# 获取端口配置
+# 获取端口和主机配置
 API_PORT=${API_PORT:-3001}
+API_HOST=${API_HOST:-0.0.0.0}
 WEB_PORT=${WEB_PORT:-5173}
+WEB_HOST=${WEB_HOST:-0.0.0.0}
+
+export API_HOST
+export WEB_HOST
 
 # 检测并调整端口
 echo "🔍 检测端口可用性..."
@@ -63,7 +68,7 @@ WEB_PORT=$(find_available_port $WEB_PORT)
 export API_PORT
 export WEB_PORT
 
-echo "✅ 使用端口：API=$API_PORT, Web=$WEB_PORT"
+echo "✅ 监听地址：API=$API_HOST:$API_PORT, Web=$WEB_HOST:$WEB_PORT"
 
 # 检查依赖
 if [ ! -d "node_modules" ]; then
@@ -81,16 +86,17 @@ fi
 echo ""
 echo "🚀 启动 API 服务器和 Web UI..."
 echo ""
-echo "访问地址：http://localhost:$WEB_PORT"
-echo "API 地址：http://localhost:$API_PORT"
+echo "访问地址："
+echo "  Web UI: http://localhost:$WEB_PORT (本地) 或 http://$(hostname -I | awk '{print $1}'):${WEB_PORT} (局域网)"
+echo "  API:    http://localhost:$API_PORT (本地) 或 http://$(hostname -I | awk '{print $1}'):${API_PORT} (局域网)"
 echo ""
 echo "按 Ctrl+C 停止服务"
 echo ""
 
 # 启动 API 服务器和 Web UI
 npx concurrently \
-  "node api-server.js" \
-  "cd web-ui && VITE_API_URL=http://localhost:$API_PORT/api npm run dev" \
+  "HOST=$API_HOST node api-server.js" \
+  "cd web-ui && HOST=$WEB_HOST VITE_API_URL=http://localhost:$API_PORT/api npm run dev -- --host $WEB_HOST" \
   --names "API,WEB" \
   --prefix-colors "blue,green" \
   --kill-others
