@@ -11,12 +11,23 @@ export default defineConfig({
     strictPort: false,  // 端口被占用时自动尝试下一个
     cors: true,  // 启用 CORS
     proxy: {
-      // 代理 API 请求到 API 服务器
+      // 代理 API 请求
       '/api': {
-        target: 'http://clawbox.local:3001',
-        changeOrigin: true,
+        target: 'http://localhost:3001',
+        changeOrigin: false,  // 不改变 Origin，保持原样
         secure: false,
         ws: true,
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('❌ 代理错误:', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('📤 代理请求:', req.method, req.url);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('📥 代理响应:', req.method, req.url, proxyRes.statusCode);
+          });
+        },
       },
     },
   },
