@@ -6,32 +6,42 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: '0.0.0.0',
-    allowedHosts: true,  // 允许所有主机访问
+    allowedHosts: true,
     port: 5173,
-    strictPort: false,  // 端口被占用时自动尝试下一个
-    cors: true,  // 启用 CORS
+    strictPort: false,
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+      credentials: true,
+    },
     proxy: {
-      // 代理 API 请求
       '/api': {
-        target: 'http://localhost:3001',
-        changeOrigin: false,  // 不改变 Origin，保持原样
+        target: 'http://127.0.0.1:3001',  // 使用 IP 而不是 localhost
+        changeOrigin: true,
         secure: false,
-        ws: true,
+        ws: false,
+        // 处理 OPTIONS 预检请求
         configure: (proxy, _options) => {
-          proxy.on('error', (err, _req, _res) => {
-            console.log('❌ 代理错误:', err);
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            console.log('📤 代理请求:', req.method, req.url, '→', proxyReq.path);
+            // 添加 CORS 头
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+            res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
           });
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
-            console.log('📤 代理请求:', req.method, req.url);
-          });
-          proxy.on('proxyRes', (proxyRes, req, _res) => {
+          proxy.on('proxyRes', (proxyRes, req, res) => {
             console.log('📥 代理响应:', req.method, req.url, proxyRes.statusCode);
+          });
+          proxy.on('error', (err, req, res) => {
+            console.error('❌ 代理错误:', err.message);
+            res.writeHead(500, {'Content-Type': 'application/json'});
+            res.end(JSON.stringify({error: 'Proxy error', message: err.message}));
           });
         },
       },
     },
   },
-  // 构建配置
   build: {
     outDir: 'dist',
     sourcemap: true,
