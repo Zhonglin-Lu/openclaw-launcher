@@ -1,0 +1,78 @@
+{
+  "name": "@1va7/openclaw-launcher",
+  "version": "1.1.0",
+  "description": "OpenClaw 启动器 - 一键启动、图形化配置、自动诊断、Skills 市场 | 支持 Docker 部署",
+  "main": "src/index.js",
+  "bin": {
+    "openclaw-launcher": "./src/index.js"
+  },
+  "files": [
+    "src/",
+    "web-ui/",
+    "docs/",
+    "scripts/",
+    "api-server.js",
+    "start-web.sh",
+    "Dockerfile",
+    "docker-compose.yml",
+    ".env.example",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "build": "pkg . --targets node18-linux-x64,node18-win-x64,node18-macos-x64 --out-path dist",
+    "test": "node src/core/__tests__/config-validator.test.js",
+    "test:all": "npm run test",
+    "api": "node api-server.js",
+    "web": "cd web-ui && npm run dev",
+    "web:build": "cd web-ui && npm run build",
+    "dev:all": "concurrently \"npm run api\" \"npm run web\"",
+    "docker:build": "docker build -t openclaw-launcher .",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "validate": "node src/core/config-validator.js"
+  },
+  "keywords": [
+    "openclaw",
+    "launcher",
+    "gui",
+    "manager",
+    "skills-market"
+  ],
+  "author": "VA7",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/1va7/openclaw-launcher"
+  },
+  "dependencies": {
+    "boxen": "^5.1.2",
+    "chalk": "^4.1.2",
+    "commander": "^11.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^5.2.1",
+    "gradient-string": "^2.0.2",
+    "inquirer": "^8.2.6",
+    "ora": "^5.4.1"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "pkg": "^5.8.1"
+  },
+  "pkg": {
+    "scripts": "src/**/*.js",
+    "targets": [
+      "node18-linux-x64",
+      "node18-win-x64",
+      "node18-macos-x64"
+    ],
+    "outputPath": "dist"
+  }
+}

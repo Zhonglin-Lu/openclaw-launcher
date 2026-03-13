@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClaw 启动器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .status-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .status-title {
+            font-size: 1.5em;
+            color: #333;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.running {
+            background: #48bb78;
+        }
+
+        .status-dot.stopped {
+            background: #f56565;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .btn-warning {
+            background: #ed8936;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #dd6b20;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .info-item {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-label {
+            color: #718096;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            color: #2d3748;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .info-value.success {
+            color: #48bb78;
+        }
+
+        .info-value.error {
+            color: #f56565;
+        }
+
+        .section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .log-container {
+            background: #1a202c;
+            color: #48bb78;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-line {
+            margin-bottom: 5px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+        }
+
+        .skills-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .skill-item {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .skill-item:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .skill-name {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .skill-source {
+            font-size: 0.8em;
+            color: #718096;
+            margin-top: 5px;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🦞 OpenClaw 启动器</h1>
+            <p>让 OpenClaw 更易用 - 一键启动 | 图形配置 | 自动诊断 | Skills 市场</p>
+        </header>
+
+        <!-- 状态卡片 -->
+        <div class="status-card">
+            <div class="status-header">
+                <h2 class="status-title">Gateway 状态</h2>
+                <div class="status-indicator">
+                    <div class="status-dot running" id="statusDot"></div>
+                    <span id="statusText">运行中</span>
+                </div>
+            </div>
+
+            <div class="control-buttons">
+                <button class="btn btn-primary" onclick="startGateway()" id="startBtn">
+                    ▶️ 启动
+                </button>
+                <button class="btn btn-danger" onclick="stopGateway()" id="stopBtn">
+                    ⏹️ 停止
+                </button>
+                <button class="btn btn-warning" onclick="restartGateway()" id="restartBtn">
+                    🔄 重启
+                </button>
+                <button class="btn btn-primary" onclick="refreshStatus()" id="refreshBtn">
+                    🔄 刷新
+                </button>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">PID</div>
+                    <div class="info-value" id="pidValue">294</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">端口</div>
+                    <div class="info-value" id="portValue">18789</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">健康状态</div>
+                    <div class="info-value success" id="healthValue">健康</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">运行时间</div>
+                    <div class="info-value" id="uptimeValue">2 小时 15 分钟</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 系统信息 -->
+        <div class="section">
+            <h3 class="section-title">📊 系统信息</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">OpenClaw 版本</div>
+                    <div class="info-value" id="versionValue">2026.3.8</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Node.js 版本</div>
+                    <div class="info-value" id="nodeValue">v22.22.1</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">配置文件</div>
+                    <div class="info-value success">✓ 正常</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Workspace</div>
+                    <div class="info-value success">✓ 正常</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Skills 市场 -->
+        <div class="section">
+            <h3 class="section-title">🧩 已安装 Skills</h3>
+            <div class="skills-list" id="skillsList">
+                <!-- 由 JS 动态生成 -->
+            </div>
+        </div>
+
+        <!-- 日志 -->
+        <div class="section">
+            <h3 class="section-title">📝 操作日志</h3>
+            <div class="log-container" id="logContainer">
+                <div class="log-line">[10:11:00] 系统启动完成</div>
+                <div class="log-line">[10:11:01] Gateway 运行正常</div>
+            </div>
+        </div>
+
+        <footer>
+            <p>OpenClaw 启动器 v1.0.0 | Made with ❤️ by VA7</p>
+        </footer>
+    </div>
+
+    <script>
+        // 模拟数据 - 实际应用中通过 API 获取
+        const mockData = {
+            gateway: {
+                running: true,
+                pid: 294,
+                port: 18789,
+                healthy: true,
+                uptime: '2 小时 15 分钟'
+            },
+            system: {
+                version: '2026.3.8',
+                node: 'v22.22.1',
+                config: 'normal',
+                workspace: 'normal'
+            },
+            skills: [
+                { name: 'academic-figure-design', source: 'workspace' },
+                { name: 'academic-paper-writing', source: 'workspace' },
+                { name: 'memory-manager', source: 'workspace' },
+                { name: 'office-automation', source: 'workspace' },
+                { name: 'plot', source: 'workspace' }
+            ]
+        };
+
+        // 初始化
+        function init() {
+            refreshStatus();
+            renderSkills();
+        }
+
+        // 刷新状态
+        function refreshStatus() {
+            addLog('刷新状态...');
+            
+            // 模拟 API 调用
+            setTimeout(() => {
+                updateUI(mockData);
+                addLog('状态刷新完成');
+            }, 500);
+        }
+
+        // 更新 UI
+        function updateUI(data) {
+            // Gateway 状态
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            
+            if (data.gateway.running) {
+                statusDot.className = 'status-dot running';
+                statusText.textContent = '运行中';
+            } else {
+                statusDot.className = 'status-dot stopped';
+                statusText.textContent = '已停止';
+            }
+
+            // 信息卡片
+            document.getElementById('pidValue').textContent = data.gateway.pid;
+            document.getElementById('portValue').textContent = data.gateway.port;
+            document.getElementById('healthValue').textContent = data.gateway.healthy ? '健康' : '异常';
+            document.getElementById('healthValue').className = data.gateway.healthy ? 'info-value success' : 'info-value error';
+            document.getElementById('uptimeValue').textContent = data.gateway.uptime;
+
+            // 系统信息
+            document.getElementById('versionValue').textContent = data.system.version;
+            document.getElementById('nodeValue').textContent = data.system.node;
+        }
+
+        // 渲染 Skills
+        function renderSkills() {
+            const container = document.getElementById('skillsList');
+            container.innerHTML = mockData.skills.map(skill => `
+                <div class="skill-item">
+                    <div class="skill-name">${skill.name}</div>
+                    <div class="skill-source">📁 ${skill.source}</div>
+                </div>
+            `).join('');
+        }
+
+        // 启动 Gateway
+        function startGateway() {
+            addLog('正在启动 Gateway...');
+            // 实际应用中调用 API
+            setTimeout(() => {
+                addLog('Gateway 启动成功');
+                refreshStatus();
+            }, 1000);
+        }
+
+        // 停止 Gateway
+        function stopGateway() {
+            addLog('正在停止 Gateway...');
+            setTimeout(() => {
+                addLog('Gateway 已停止');
+                refreshStatus();
+            }, 1000);
+        }
+
+        // 重启 Gateway
+        function restartGateway() {
+            addLog('正在重启 Gateway...');
+            setTimeout(() => {
+                addLog('Gateway 重启完成');
+                refreshStatus();
+            }, 2000);
+        }
+
+        // 添加日志
+        function addLog(message) {
+            const container = document.getElementById('logContainer');
+            const time = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+            const line = document.createElement('div');
+            line.className = 'log-line';
+            line.textContent = `[${time}] ${message}`;
+            container.appendChild(line);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // 页面加载完成
+        window.onload = init;
+    </script>
+</body>
+</html>

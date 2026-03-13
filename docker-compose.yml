@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  openclaw-launcher:
+    build: .
+    ports:
+      - "${API_PORT:-3001}:3001"
+      - "${WEB_PORT:-5173}:5173"
+    volumes:
+      # 挂载 OpenClaw 配置
+      - ~/.openclaw:/root/.openclaw
+      # 挂载日志
+      - ./logs:/app/logs
+      # 可选：挂载源代码用于开发
+      # - ./src:/app/src
+      # - ./api-server.js:/app/api-server.js
+    environment:
+      - API_PORT=3001
+      - API_HOST=0.0.0.0
+      - WEB_HOST=0.0.0.0
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - NODE_ENV=${NODE_ENV:-production}
+      # OpenClaw 配置
+      - OPENCLAW_CONFIG_PATH=/root/.openclaw/openclaw.json
+      - OPENCLAW_GATEWAY_PORT=18789
+      # 功能开关
+      - ENABLE_SKILLS_MARKET=true
+      - ENABLE_USAGE_TRACKING=true
+    restart: unless-stopped
+    networks:
+      - openclaw-network
+
+  # 可选：添加 Nginx 反向代理
+  # nginx:
+  #   image: nginx:alpine
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf
+  #   depends_on:
+  #     - openclaw-launcher
+  #   networks:
+  #     - openclaw-network
+
+networks:
+  openclaw-network:
+    driver: bridge
