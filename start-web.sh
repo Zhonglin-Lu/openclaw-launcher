@@ -87,8 +87,12 @@ echo ""
 echo "🚀 启动 API 服务器和 Web UI..."
 echo ""
 echo "访问地址："
-echo "  Web UI: http://localhost:$WEB_PORT (本地) 或 http://$(hostname -I | awk '{print $1}'):${WEB_PORT} (局域网)"
-echo "  API:    http://localhost:$API_PORT (本地) 或 http://$(hostname -I | awk '{print $1}'):${API_PORT} (局域网)"
+echo "  Web UI: http://localhost:$WEB_PORT (本地)"
+echo "  API:    http://localhost:$API_PORT (本地)"
+echo ""
+echo "局域网访问:"
+echo "  Web UI: http://$(hostname -I | awk '{print $1}'):${WEB_PORT}"
+echo "  API:    http://$(hostname -I | awk '{print $1}'):${API_PORT}"
 echo ""
 echo "按 Ctrl+C 停止服务"
 echo ""
@@ -96,7 +100,7 @@ echo ""
 # 启动 API 服务器和 Web UI
 npx concurrently \
   "HOST=$API_HOST node api-server.js" \
-  "cd web-ui && HOST=$WEB_HOST VITE_API_URL=http://localhost:$API_PORT/api npm run dev -- --host $WEB_HOST" \
+  "cd web-ui && npm run dev -- --host $WEB_HOST" \
   --names "API,WEB" \
   --prefix-colors "blue,green" \
   --kill-others
