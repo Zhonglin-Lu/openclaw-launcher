@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>API 测试</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #1a1a2e; color: white; }
+    .status { padding: 10px; margin: 10px 0; border-radius: 8px; }
+    .success { background: #22c55e; }
+    .error { background: #ef4444; }
+    .info { background: #3b82f6; }
+    pre { background: #0f0f1a; padding: 15px; border-radius: 8px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>🦞 OpenClaw API 测试</h1>
+  
+  <div id="test1" class="status info">测试 1: 连接 localhost:3001...</div>
+  <div id="test2" class="status info">测试 2: 连接当前主机:3001...</div>
+  <div id="test3" class="status info">测试 3: Vite 代理...</div>
+  
+  <h2>结果:</h2>
+  <pre id="results"></pre>
+
+  <script>
+    const results = [];
+    
+    async function testAPI(baseUrl, testName) {
+      const element = document.getElementById(testName);
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000);
+        
+        const response = await fetch(`${baseUrl}/api/status`, {
+          signal: controller.signal
+        });
+        clearTimeout(timeout);
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        element.className = 'status success';
+        element.textContent = `✅ ${testName} - 成功!`;
+        results.push({ test: testName, status: 'success', url: baseUrl, data });
+      } catch (error) {
+        element.className = 'status error';
+        element.textContent = `❌ ${testName} - 失败：${error.message}`;
+        results.push({ test: testName, status: 'error', url: baseUrl, error: error.message });
+      }
+      updateResults();
+    }
+    
+    function updateResults() {
+      document.getElementById('results').textContent = JSON.stringify(results, null, 2);
+    }
+    
+    // 运行测试
+    testAPI('http://localhost:3001', 'test1');
+    testAPI(`http://${window.location.hostname}:3001`, 'test2');
+    testAPI('/api', 'test3');
+  </script>
+</body>
+</html>
